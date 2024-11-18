@@ -21,22 +21,40 @@ def get_estimated_price (location, sqft, bhk, bath):
         x[loc_index] = 1
     return round(__model.predict([x])[0],2)
 
+import os
+import json
+import pickle
+
+__data_columns = None
+__locations = None
+__model = None
+
 def load_artifacts():
     print("loading artifacts")
     global __data_columns
     global __locations
+    global __model
 
-    with open('./server/artifacts/columns.json', 'r') as f:
+    # Get the directory of this script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Construct the correct paths
+    columns_path = os.path.join(current_dir, 'artifacts', 'columns.json')
+    model_path = os.path.join(current_dir, 'artifacts', 'bengaluru_home_prices_model.pickle')
+
+    # Load columns.json
+    with open(columns_path, 'r') as f:
         __data_columns = json.load(f)['data_columns']
         __locations = __data_columns[3:]
 
-    global __model
-
+    # Load the model
     if __model is None:
-        with open ('./server/artifacts/bengaluru_home_prices_model.pickle', 'rb') as f:
+        with open(model_path, 'rb') as f:
             __model = pickle.load(f)
 
-print ('loading of artifacts done')
+    print("loading of artifacts done")
+
+
 
 def get_location_names():
     return __locations
